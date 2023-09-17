@@ -1,6 +1,5 @@
-//Decrypts obfuscated passwords by Remmina - The GTK+ Remote Desktop Client
-//written by Michael Cochez
-
+// Decrypts obfuscated passwords by Remmina - The GTK+ Remote Desktop Client
+// written by Michael Cochez
 // written by Robin He (https://github.com/gzhechu)
 
 package main
@@ -20,16 +19,11 @@ import (
 var secretFile = ".config/remmina/remmina.pref"
 var passwdFolder = ".local/share/remmina"
 
-//set the variables here
-
-var base64secret = "vCdMntBxnjHS5gvIgerSxewMv0bmYVj/Gu2N5dI2q44="
-var base64password = "fPwbyUMhdPpCWEO2YzJgGQ=="
-
 //The secret is used for encrypting the passwords. This can typically be found from ~/.remmina/remmina.pref on the line containing 'secret='.
 //"The encrypted password used for the connection. This can typically be found from /.remmina/dddddddddddd.remmina " on the line containing 'password='.
 //Copy everything after the '=' sign. Also include final '=' signs if they happen to be there.
 
-func getSecret(fn string) (err error, secret string) {
+func getSecret(fn string) (secret string, err error) {
 	inifile, err := ini.Load(fn)
 	if err != nil {
 		return
@@ -38,7 +32,7 @@ func getSecret(fn string) (err error, secret string) {
 	return
 }
 
-func getSessionPwd(fn string) (err error, cfgs map[string]string) {
+func getSessionPwd(fn string) (cfgs map[string]string, err error) {
 	cfgs = make(map[string]string)
 	var files []string
 	err = filepath.Walk(fn, func(path string, info os.FileInfo, err error) error {
@@ -101,17 +95,17 @@ func main() {
 	}
 
 	filepath := fmt.Sprintf("%s/%s", dirname, secretFile)
-	err, base64secret := getSecret(filepath)
+	base64secret, err := getSecret(filepath)
 	if err != nil {
 		log.Fatalf("read secret file error: %v\n\n", err)
 	}
-	log.Printf("secret: %s", base64secret)
+	// log.Printf("secret: %s", base64secret)
 
 	filepath = fmt.Sprintf("%s/%s", dirname, passwdFolder)
 	getSessionPwd(filepath)
 
 	filepath = fmt.Sprintf("%s/%s", dirname, passwdFolder)
-	err, cfgs := getSessionPwd(filepath)
+	cfgs, err := getSessionPwd(filepath)
 	if err != nil {
 		log.Fatalf("read session file error: %v\n\n", err)
 	}
